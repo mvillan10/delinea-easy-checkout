@@ -1,7 +1,22 @@
-# Delinea secret server ID, Bearer Token, and saveToFile configuration
-$secretId = 1234 # Secret ID 
-$apiToken = "{API_TOKEN}" # Bearer Token
+# Delinea secret server ID and saveToFile configuration
+$secretId = 2170 # Secret ID 
+$tokenFilePath = "$PSScriptRoot\apiToken.txt"
 $saveToFile = $true # Save password to file
+
+# Function to read the token from the file
+function Read-TokenFromFile {
+    if (Test-Path $tokenFilePath) {
+        return Get-Content -Path $tokenFilePath -Raw
+    }
+    return $null
+}
+
+# Read the API token from the file
+$apiToken = Read-TokenFromFile
+if (-not $apiToken) {
+    Write-Output "Error: API token not found. Please run fetchApiToken.ps1 to generate a new token."
+    exit
+}
 
 # Define the API base URL
 $secretServerUrl = "https://maersk-prod.secretservercloud.co.uk"
@@ -13,7 +28,6 @@ $headers = @{
     "Authorization" = "Bearer ${apiToken}"
     "Content-Type"  = "application/json"
 }
-
 
 # Send the API request and get the response
 try {
