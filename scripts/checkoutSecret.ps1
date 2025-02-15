@@ -1,26 +1,50 @@
-# Delinea secret server ID and saveToFile configuration
-$secretId = 2170 # Secret ID 
-$tokenFilePath = "$PSScriptRoot\apiToken.txt"
-$saveToFile = $true # Save password to file
-
-# Function to read the token from the file
-function Read-TokenFromFile {
-    if (Test-Path $tokenFilePath) {
-        return Get-Content -Path $tokenFilePath -Raw
-    }
-    return $null
+# Load environment variables from .env file
+$envFilePath = "$PSScriptRoot\.env"
+if (-not (Test-Path $envFilePath)) {
+    Write-Output "Error: .env file not found. Please ensure the .env file is present in the script directory."
+    exit
 }
 
-# Read the API token from the file
-$apiToken = Read-TokenFromFile
+Get-Content $envFilePath | ForEach-Object {
+    if ($_ -match "^\s*([^=]+?)\s*=\s*(.*?)\s*$") {
+        [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2])
+    }
+}
+
+# Delinea secret server ID and saveToFile configuration
+$secretId = [System.Environment]::GetEnvironmentVariable("SECRET_ID")
+$back4AppUrl = [System.Environment]::GetEnvironmentVariable("BACK4APP_URL")
+$appId = [System.Environment]::GetEnvironmentVariable("APP_ID")
+$apiKey = [System.Environment]::GetEnvironmentVariable("API_KEY")
+$secretServerUrl = [System.Environment]::GetEnvironmentVariable("SECRET_SERVER_URL")
+$saveToFile = $true # Save password to file
+
+# Function to fetch the token from Back4App
+function Fetch-TokenFromBack4App {
+    $headers = @{
+        "X-Parse-Application-Id" = $appId
+        "X-Parse-REST-API-Key"   = $apiKey
+        "Content-Type"           = "application/json"
+    }
+
+    try {
+        $response = Invoke-RestMethod -Uri $back4AppUrl -Method Post -Headers $headers
+        return $response.result
+    } catch {
+        Write-Output "Error fetching API token from Back4App: $_"
+        return $null
+    }
+}
+
+# Fetch the API token from Back4App
+$apiToken = Fetch-TokenFromBack4App
 if (-not $apiToken) {
-    Write-Output "Error: API token not found. Please run fetchApiToken.ps1 to generate a new token."
+    Write-Output "Error: API token not found. Please ensure the token is available in Back4App."
     exit
 }
 
 # Define the API base URL
-$secretServerUrl = "https://maersk-prod.secretservercloud.co.uk"
-$baseUrl = "https://maersk-prod.secretservercloud.co.uk/api/v1"
+$baseUrl = "$secretServerUrl/api/v1"
 $checkOutUrl = "secrets/$secretId/fields/password"
 
 # Create headers with Authorization
