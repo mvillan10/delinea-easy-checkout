@@ -4,36 +4,32 @@ This project automates the process of checking out a secret password from Deline
 
 ## Files
 
-- `GenerateADMPassword.bat`: Batch script to execute the PowerShell script.
-- `checkoutSecret.ps1`: PowerShell script to fetch the password from Delinea Secret Server.
-- `password.txt`: File where the fetched password is saved.
-- `fetchApiToken.ps1`: PowerShell script to fetch and refresh the API token periodically.
-- `RunFetchApiTokenService.bat`: Batch script to run `fetchApiToken.ps1` as a service.
-- `CreateScheduledTask.ps1`: PowerShell script to create a scheduled task for running `RunFetchApiTokenService.bat`.
+- `scripts/GenerateADMPassword.bat`: Batch script to execute the PowerShell script.
+- `scripts/checkoutSecret.ps1`: PowerShell script to fetch the password from Delinea Secret Server.
+- `scripts/password.txt`: File where the fetched password is saved.
+- `scripts/.env`: Environment variables file.
+- `back4app/functions/main.js`: Back4App Cloud Function to fetch and refresh the API token periodically.
+- `back4app/readme.md`: Instructions for deploying the project on Back4App.
 
 ## Setup
 
 1. Ensure you have PowerShell installed on your system.
 2. Clone this repository to your local machine.
+3. Create a `.env` file in the `scripts` directory and populate it with your environment variables. You can use `scripts/example.env` as a template.
 
 ## Usage
 
 1. Open a command prompt.
 2. Navigate to the project directory.
-3. Run the batch script to generate the ADM password:
+3. Run the batch script:
     ```sh
-    GenerateADMPassword.bat
+    scripts\GenerateADMPassword.bat
     ```
-4. The password will be saved to `password.txt` and copied to your clipboard.
-5. To set up the API token fetcher as a background service, run the following PowerShell script:
-    ```sh
-    .\CreateScheduledTask.ps1
-    ```
+4. The password will be saved to `scripts/password.txt` and copied to your clipboard.
 
 ## Configuration
 
-- Update the `$secretId` and `$apiToken` variables in `checkoutSecret.ps1` with your Delinea Secret Server ID and API token.
-- Update the `$apiUrl` and other relevant variables in `fetchApiToken.ps1` as needed.
+- Update the environment variables in the `scripts/.env` file with your Delinea Secret Server ID, Back4App URL, App ID, API Key, and Secret Server URL.
 
 ## License
 
